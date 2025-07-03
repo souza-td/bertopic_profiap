@@ -2,7 +2,7 @@
 
 Mapeamento automático de 1.258 dissertações do Mestrado Profissional em Administração Pública (2015–2023) com BERTopic, identificando 24 tópicos que abrangem áreas como qualidade de vida no trabalho, sustentabilidade em compras públicas, teletrabalho, inclusão e transparência. O pipeline integra embeddings multilíngues, redução de dimensionalidade e clusterização por densidade, com rótulos gerados por modelo de linguagem para facilitar a interpretação. Inclui um dashboard interativo em Quarto com visualizações sobre evolução temporal e frequência de termos, apoiando pesquisadores e gestores na análise e formulação de políticas.
 
-Dashboar interativo disponível em: https://thiago-dsouza.quarto.pub/bertopic-profiap
+Dashboard interativo disponível em: https://thiago-dsouza.quarto.pub/bertopic-profiap
 
 ## 1. Executado em
 
