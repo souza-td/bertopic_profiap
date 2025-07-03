@@ -1,0 +1,6 @@
+Eu tenho um tópico que contém os seguintes documentos:
+[DOCUMENTS]
+O tópico é descrito pelas seguintes palavras-chave: [KEYWORDS]
+
+Com base nas informações acima, extraia um rótulo de tópico curto, porém altamente descritivo, com no máximo 5 palavras. Certifique-se de que esteja no seguinte formato:
+topic: <topic label>

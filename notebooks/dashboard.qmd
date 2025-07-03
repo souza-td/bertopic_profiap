@@ -1,0 +1,166 @@
+---
+title: "Descoberta de Tópicos do Mestrado Profissional em Administração Pública (PROFIAP)"
+author: "Thiago Duarte de Souza"
+format:
+  dashboard:
+    orientation: rows
+    expandable: true
+    scrolling: true
+    theme: cosmo
+    nav-buttons:
+      - icon: github
+        href: https://github.com/souza-td/
+editor: visual
+jupyter: python3
+freeze: auto
+execute: 
+  eval: true
+  output: true
+  echo: false
+  warning: false
+---
+
+```{python}
+# Imports
+from pathlib import Path
+import pandas as pd, random, numpy as np
+from sentence_transformers import SentenceTransformer
+from bertopic import BERTopic
+
+import spacy
+from spacy.lang.pt.stop_words import STOP_WORDS as STOP_PT
+
+
+# Semente para compoenentes pseudo-aleatórios
+SEED = 42
+random.seed(SEED); np.random.seed(SEED)
+
+# Diretorios
+ROOT = Path('../')
+DATA_DIR   = ROOT / 'data'
+MODEL_DIR  = ROOT / 'models'/ 'expr_bertopic_profiap'
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
+# Carregar dados e pré-processamento
+CSV_PATH = DATA_DIR / 'raw' / 'dissertacoes_profiap_14_23.csv'  # ajuste se precisar
+df = pd.read_csv(CSV_PATH).drop_duplicates("DS_RESUMO")
+docs = df["DS_RESUMO"].fillna("").tolist()
+nlp  = spacy.load('pt_core_news_sm', disable=['ner', 'parser'])
+def preprocess(doc):
+    return ' '.join([t.lemma_.lower() for t in nlp(doc) if t.is_alpha and not t.is_stop])
+docs_pp = [preprocess(d) for d in docs]
+
+emb_model = SentenceTransformer("ibm-granite/granite-embedding-278m-multilingual", trust_remote_code=True)
+embeddings = emb_model.encode(docs_pp, show_progress_bar=True)
+
+topic_model = BERTopic.load(MODEL_DIR / 'model_final_gpt_labels', embedding_model=emb_model)
+
+# Visualizações
+datamap = topic_model.visualize_document_datamap(
+    docs=docs_pp,
+    embeddings=embeddings,
+    interactive=True,
+    enable_search=True,
+    custom_labels=True,
+    title="Mapa das Dissertações PROFIAP (2015-2023)",
+)
+
+barchart = topic_model.visualize_barchart(top_n_topics=16, n_words=5,autoscale=True)
+
+topics_over_time = topic_model.topics_over_time(docs_pp, timestamps=df['AN_BASE'],)
+topics_over_time_visualization = topic_model.visualize_topics_over_time(topics_over_time)
+
+hierarchical_topics = topic_model.hierarchical_topics(docs_pp)
+hierarchical_visualization = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+
+hierarchical_tree = topic_model.get_topic_tree(hierarchical_topics)
+
+topic_info = topic_model.get_topic_info()
+
+topic_model.set_topic_labels([item[0] for item in topic_model.get_topic_info().gpt_label])
+
+# Visualizações
+datamap = topic_model.visualize_document_datamap(
+    docs=docs_pp,
+    embeddings=embeddings,
+    interactive=True,
+    enable_search=True,
+    custom_labels=True,
+    title="Mapa das Dissertações PROFIAP (2015-2023)",
+)
+
+# Tabela de Representações utilizando LLM
+tab_rep_llm = topic_model.get_topic_info()[['Topic', 'Count', 'Representation', 'gpt_label']][1:].set_index('Topic')
+tab_rep_llm.columns = ['quantidade','palavras-chave','gpt_label']
+```
+
+# DataMapPlot {orientation="columns" scrolling="true"}
+
+## Intro {width="20%"}
+
+### Visão-geral
+
+**Visão geral**
+
+-   **1 258** resumos de dissertações (2015 – 2023)
+-   Aplicação de descoberta de tópicos utilizando **BERTopic**.
+-   Identificados **16 tópicos** correspondendo a **72 %** do corpus.
+
+### Como usar o gráfico
+
+**Como explorar o gráfico**
+
+-   **Duplo Clique** → Dá zoom em uma área (segure Ctrl enquanto dá dúplo clique para zoom-out)
+-   **Tamanho da fonte** → indica a quantidade de documentos no tópico.\
+-   **Passe o mouse** sobre qualquer ponto → exibe o resumo correspondente.\
+-   **Campo de busca** → filtra e destaca apenas os documentos que contêm o termo.\
+-   **Proximidade dos pontos** → NÃO é distância temática direta; observe a **densidade** para indícios de similaridade.
+
+### Saiba mais
+
+**Saiba mais**
+
+-   ▶️ **Termos mais relevantes por tópico**
+-   ▶️ **Distribuição temporal dos tópicos**
+
+
+## Mapa Interativo {.fill width="80%"}
+
+```{python}
+datamap
+```
+
+# Tabela de Tópicos {.fill orientation="rows" scrolling="true"}
+
+```{python}
+from itables import show
+
+show(
+    topic_info,
+    scrollY   = "70vh", 
+    dom="Blfrtip",
+    )
+```
+
+# Termos mais relevantes {.fill orientation="rows" scrolling="true"}
+
+##
+
+**Termos mais relevantes por tópico**
+
+-   Os valores são o cTF-IDF para cada termo no respectivo tópico.
+
+##
+
+```{python}
+topic_model.visualize_barchart(topics=range(0,24), n_words=10,autoscale=True, width=350, height=300)
+
+```
+
+# Distribuição temporal  {.fill orientation="rows"}
+
+##
+
+```{python}
+topics_over_time_visualization
+```

@@ -1,0 +1,6 @@
+Eu tenho um tópico que contém os seguintes documentos:
+[DOCUMENTS]
+O tópico é descrito pelas seguintes palavras-chave: [KEYWORDS]
+
+Com base nas informações acima, me dê um paragrafo curto em português contendo a descrição deste tópico. Certifique-se de que sua resposta esteja no seguinte formato:
+topic: <descrição>
