@@ -30,6 +30,7 @@ poetry install
 ```
 
 ## 3. Estrutura básica do repositório
+```bash
 
 .
 ├── 00_dados_sucupira.py                                # Opicional: Tratamento de dados da Plataforma Sucupira (CSV disponível no repositório)
@@ -51,6 +52,7 @@ poetry install
 ├── README.md
 └── scripts
     └── download_spacy_model.sh
+```
 
 ## 4. Como reproduzir rapidamente
 
